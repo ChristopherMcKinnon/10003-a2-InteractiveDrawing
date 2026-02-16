@@ -11,68 +11,85 @@ namespace MohawkGame2D
     public class Game
     {
         // Place your variables here:
-        Vector2 origin = new Vector2(50,50);
-        Vector2 end = new Vector2(500,500);
-        int[] winSize = [800,600];
+        static int[] canvasSize = [600,600];
+        static int[][] myList = [[12],[34]];
+        
 
-        Vector2 oldMousePos;
-        Vector2 currentMousePos;
-
-        int extraLines = 20;
-
-        int spacingThreshold = 10;
-        int spacingThresholdForward = 100;
-        float xSpacing = 30;
-        float ySpacing = 30;
-
-        int angleThreshold = 200;
-        float xAngle = 0;
-        float yAngle = 0;
-
-        int sideThreshold =50;
-        float sideOffset = 0;
-
-        Vector2 horizonPoint = new Vector2(400, 300); // Fix this
+        
 
         /// <summary>
         ///     Setup runs once before the game loop begins.
         /// </summary>
         /// 
-
-        void DrawGrid(float x, float y, float xAngle, float yAngle, float sideOffset)
+        
+        public Vector2 TransformVerticies(Vector2 v)
         {
-            // Make horizon line
-            Draw.LineColor = Color.Black;
-            Draw.Line(0, horizonPoint.Y, winSize[0], horizonPoint.Y);
-            Draw.Circle(horizonPoint, 3);
+            
+            float xFactor = (canvasSize[0]) / 2;
+            float yFactor = (canvasSize[1]) / 2;
 
-            // Draw lines from horizon line
+            // Math is x*(w/2)+w/2  >   (x+1)(w/2)
 
-            Draw.LineColor = Color.Black;
-            for (float i = 0; i < winSize[0]*3/x; i++)
+            v.X = (v.X + 1.0f) * xFactor;
+            v.Y = (v.Y + 1.0f) * yFactor;
+
+            return v;
+        }
+
+        public void DrawCube(float size)
+        {
+            float side = (size / 2.0f);
+            /*
+            Vector3[] verticies = [
+                new Vector3(-side, -side, -side),   // 0
+                new Vector3(side, -side, -side),    // 1
+                new Vector3(-side, side, -side),    // 2
+                new Vector3(side, side, -side),     // 3
+                new Vector3(-side, -side, side),    // 4
+                new Vector3(side, -side, side),     // 5
+                new Vector3(-side, side, side),     // 6
+                new Vector3(side, side, side)       // 7
+                ];
+            Vector2[] verticies = [
+                new Vector2(-side / -side, -side / -side),   // 0
+                new Vector2(side / -side, -side / -side),    // 1
+                new Vector2(-side / -side, side / -side),    // 2
+                new Vector2(side / -side, side / -side),     // 3
+                new Vector2(-side / side, -side / side),    // 4
+                new Vector2(side / side, -side / side),     // 5
+                new Vector2(-side / side, side / side),     // 6
+                new Vector2(side / side, side / side)       // 7
+                ];
+             */
+            Vector2[] verticies = [
+                new Vector2(-side, -side),   // 0
+                new Vector2(side, -side),    // 1
+                new Vector2(-side, side),    // 2
+                new Vector2(side, side),     // 3
+                new Vector2(-side, -side),    // 4
+                new Vector2(side, -side),     // 5
+                new Vector2(-side, side),     // 6
+                new Vector2(side, side)       // 7
+                ];
+
+            int[][] assignPoints = [
+                [0, 1], [1, 3], [3, 2], [2, 0],
+                [0, 4], [1, 5], [3, 7], [2, 6],
+                [4, 6], [5, 7], [7, 6], [6, 4]
+                ];
+            for (int i = 0; i < verticies.Length; i++)
             {
-                Draw.Line(horizonPoint.X, horizonPoint.Y, i * x - winSize[0], winSize[1]);
+                verticies[i] = TransformVerticies(verticies[i]);
             }
-
-
-            // Draw Cartesian Grid
-            Draw.LineColor = Color.Blue;
-            for (float i = 0 - (x * extraLines)/x; i < winSize[0] + x / x; i++)
+            for (int i = 0; i < assignPoints.Length; i++)
             {
-                Draw.Line(new Vector2(i*x+sideOffset, 0), new Vector2(i*x+xAngle+sideOffset, winSize[1])); // Draw y lines every {x} pixels
+                Draw.Line(verticies[assignPoints[i][0]], verticies[assignPoints[i][1]]);
             }
-            Draw.LineColor = Color.Red;
-            for (float i = 0 - (y * extraLines)/y; i < winSize[0] + y / y; i++)
-            {
-                Draw.Line(new Vector2(0, i*y), new Vector2(winSize[0], i*y+yAngle)); // Draw x lines every {y} pixels
-            }
-         
-
         }
 
         public void Setup()
         {
-            Window.SetSize(winSize[0], winSize[1]);
+            Window.SetSize(canvasSize[0], canvasSize[1]);
             Window.TargetFPS = 60;
             Window.SetTitle("2D Drawing - Christopher Lawrick-McKinnon");
 
@@ -84,49 +101,10 @@ namespace MohawkGame2D
         public void Update()
         {
             Window.ClearBackground(Color.White); // Clear screen
+            DrawCube(1f);
 
-            currentMousePos = Input.GetMousePosition(); // Refresh mouse pos from previous frame
-
-            if (Input.IsMouseButtonDown(0) == true)
-            {
-                xAngle += currentMousePos.X - oldMousePos.X;
-                if (xAngle < -angleThreshold) {  xAngle = -angleThreshold; }
-                if (xAngle > angleThreshold) {  xAngle = angleThreshold; }
-                yAngle += currentMousePos.Y - oldMousePos.Y;
-                if (yAngle < -angleThreshold) { yAngle = -angleThreshold; }
-                if (yAngle > angleThreshold) { yAngle = angleThreshold; }
-            }
-
-            if (Input.IsKeyboardKeyDown(KeyboardInput.W) == true)
-            {
-                xSpacing++; // Update change in grid spacing
-                ySpacing++; // Update change in grid spacing
-                if (xSpacing > spacingThresholdForward) { xSpacing = spacingThresholdForward; } // x Threshold
-                if (ySpacing > spacingThresholdForward) { ySpacing = spacingThresholdForward; } // y Threshold
-                Console.WriteLine($"xSpacing: {xSpacing}\nySpacing: {ySpacing}");
-            }
-            if (Input.IsKeyboardKeyDown(KeyboardInput.S) == true)
-            {
-                xSpacing--;// Update change in grid spacing
-                ySpacing--;// Update change in grid spacing
-                if (xSpacing < spacingThreshold) { xSpacing = spacingThreshold; } // x Threshold
-                if (ySpacing < spacingThreshold) { ySpacing = spacingThreshold; } // y Threshold
-                Console.WriteLine($"xSpacing: {xSpacing}\nySpacing: {ySpacing}");
-            }
-            if (Input.IsKeyboardKeyDown(KeyboardInput.A) == true)
-            {
-                sideOffset++;// Update change in left movement
-                if (sideOffset < -sideThreshold) { sideOffset = -sideThreshold; } // left Threshold
-            }
-            if (Input.IsKeyboardKeyDown(KeyboardInput.D) == true)
-            {
-                sideOffset--;// Update change in right movement
-                if (sideOffset > sideThreshold) { sideOffset = sideThreshold; } // right Threshold
-            }
-
-            DrawGrid(xSpacing, ySpacing, xAngle, yAngle, sideOffset);
-
-            oldMousePos = currentMousePos; // Remember mouse pos from current frame
+            // Convert every verticy to screenspace
+            
         }
     }
 
