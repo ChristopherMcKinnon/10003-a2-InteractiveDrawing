@@ -120,7 +120,13 @@ namespace MohawkGame2D
         public void Update()
         {
             Window.ClearBackground(Color.White); // Clear screen
-
+            if (Input.IsMouseButtonDown(0)==true)
+            { 
+                Draw.LineColor = Color.Red; 
+            } else
+            {
+                Draw.LineColor = Color.Green; 
+            }
             DrawMuscles();
             // Convert every verticy to screenspace
             
