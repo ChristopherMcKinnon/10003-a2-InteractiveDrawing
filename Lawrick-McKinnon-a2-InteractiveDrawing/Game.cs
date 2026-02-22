@@ -91,10 +91,12 @@ namespace MohawkGame2D
                 blue = (128 - totalValue) * highlightIntensity;
                 Draw.FillColor = new Color(totalValue, totalValue, totalValue + (int)blue); // Change value (grayscale) + change in blue/yellow
 
-            } else                      // Highlights
+            }
+            else                      // Highlights
             {
-                blue = (totalValue-128) * highlightIntensity;
+                blue = (totalValue - 128) * highlightIntensity;
                 Draw.FillColor = new Color(totalValue, totalValue, totalValue - (int)blue); // Change value (grayscale) + change in blue/yellow
+
             }
             Draw.Quad(TransformVerticies(a), TransformVerticies(b), TransformVerticies(c), TransformVerticies(d));
         }
@@ -171,7 +173,7 @@ namespace MohawkGame2D
             Draw.LineSize = 5;
             Draw.FillColor = Color.Yellow;
             Draw.Circle(TransformVerticies(lightSource), 5);
-            // Convert every verticy to screenspace
+            
             
         }
     }
